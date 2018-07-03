@@ -32,4 +32,40 @@ public class Material implements Serializable {
     public String toString() {
         return "ID:\t" + id + "; Name:\t" + name;
     }
+
+    public Double getMeltTemperature() {
+        return meltTemperature;
+    }
+
+    public Double getCondenseTemperature() {
+        return condenseTemperature;
+    }
+
+    public Double getHeatSolidCapacity() {
+        return heatSolidCapacity;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Double getHeatLiquidCapacity() {
+        return heatLiquidCapacity;
+    }
+
+    public Double getHeatSteamCapacity() {
+        return heatSteamCapacity;
+    }
+
+    public Double getMeltCapacity() {
+        return meltCapacity;
+    }
+
+    public Double getCondenceCapacity() {
+        return condenceCapacity;
+    }
 }
