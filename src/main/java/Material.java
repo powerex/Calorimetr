@@ -68,4 +68,5 @@ public class Material implements Serializable {
     public Double getCondenceCapacity() {
         return condenceCapacity;
     }
+
 }

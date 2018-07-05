@@ -1,8 +1,6 @@
 import javafx.util.Pair;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class Mixer {
 
@@ -44,12 +42,18 @@ public class Mixer {
         intervals.add(min);
         intervals.add(max);
 
+        // set for unique materials
+        Set<Long> materialIdSet = new HashSet<Long>();
+
         // found intervals where may be answer
         for (Item i: itemList) {
-            if (i.getCondenseTemperature() != null && isBetween(i.getCondenseTemperature(), min.getKey(), max.getKey()))
-                intervals.add(new Pair<Double, Material>(i.getCondenseTemperature(), i.getMaterial()));
-            if (i.getMeltTemperature() != null && isBetween(i.getMeltTemperature(), min.getKey(), max.getKey())) {
-                intervals.add(new Pair<Double, Material>(i.getMeltTemperature(), i.getMaterial()));
+            if (!materialIdSet.contains(i.getMaterial().getId())) {
+                materialIdSet.add(i.getMaterial().getId());
+                if (i.getCondenseTemperature() != null && isBetween(i.getCondenseTemperature(), min.getKey(), max.getKey()))
+                    intervals.add(new Pair<Double, Material>(i.getCondenseTemperature(), i.getMaterial()));
+                if (i.getMeltTemperature() != null && isBetween(i.getMeltTemperature(), min.getKey(), max.getKey())) {
+                    intervals.add(new Pair<Double, Material>(i.getMeltTemperature(), i.getMaterial()));
+                }
             }
         }
 
@@ -61,7 +65,7 @@ public class Mixer {
 
     private void calcAdditionalEnergy(double a, double b){
         // if answer inside of interval
-        double excessiveУтукпн = 0.0;
+        double excessiveEnergy = 0.0;
         double lackEnergy = 0.0;
 
         calcItemList.clear();
@@ -72,24 +76,21 @@ public class Mixer {
                 Item tmp = i;
 
                 if (tmp.getTemperature() < a) {
-                    if (tmp.getTemperature() < tmp.getMaterial().getMeltTemperature()) {
-
-                        if (isBetween(tmp.getMeltTemperature(), tmp.getTemperature(), a)) {
-                            lackEnergy += (tmp.getMeltTemperature() - tmp.getTemperature()) * tmp.getMaterial().getHeatSolidCapacity() * i.getMass();
-                            lackEnergy += tmp.getMass() * tmp.getMaterial().getMeltCapacity();
-                            tmp.setTemperature(tmp.getMeltTemperature());
-                        } else {
-                            lackEnergy += (a - tmp.getTemperature()) * tmp.getMaterial().getHeatSolidCapacity() * i.getMass();
-                            tmp.setTemperature(a);
-                        }
-                    }
-
-
-
-
+                    lackEnergy += tmp.heatTo(a);
                 }
                 else if (i.getTemperature() > b) {
-
+                    // material still steam just cooling
+                    if (b > tmp.getMaterial().getCondenseTemperature()) {
+                        excessiveEnergy += (tmp.getTemperature() - b) * tmp.getMaterial().getHeatLiquidCapacity() * tmp.getMass();
+                    }
+                    else if (b == tmp.getMaterial().getCondenseTemperature()) {
+                        // cooling to condence temperature
+                        excessiveEnergy += (tmp.getTemperature() - b) * tmp.getMaterial().getHeatLiquidCapacity() * tmp.getMass();
+                        // condence
+                        excessiveEnergy += tmp.getMaterial().getCondenceCapacity() * tmp.getMass();
+                        tmp.setState(State.LIQUID);
+                    }
+                    //else if () {}
                 }
 
             }
